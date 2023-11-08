@@ -4,6 +4,7 @@ import (
 	"log"
 	"os"
 	"github.com/cosmos/relayer/v2/relayer/provider"
+	"fmt"
 
 )
 
@@ -15,18 +16,11 @@ func CreateLogger() (log.Logger, *os.File) {
 	return *log.Default(), f
 }
 
-// Your IBCHeader interface definition
-type IBCHeader interface {
-	Height() uint64
-	ConsensusState() ibcexported.ConsensusState
-	NextValidatorsHash() []byte
-}
-
 // LogIBCHeader formats and logs an IBCHeader
 func LogIBCHeader(logger log.Logger, header provider.IBCHeader) {
 	// Format the output
 	logOutput := fmt.Sprintf(
-		"Height: %d, ConsensusState: %v, NextValidatorsHash: %x",
+		"Height: %d\n, ConsensusState: %v\n, NextValidatorsHash: %x\n",
 		header.Height(),
 		header.ConsensusState(),
 		header.NextValidatorsHash(),
@@ -36,5 +30,5 @@ func LogIBCHeader(logger log.Logger, header provider.IBCHeader) {
 	logger.Println(logOutput)
 }
 
-	// Example usage, assuming you have an instance of IBCHeader
-	// LogIBCHeader(logger, ibcHeaderInstance)
+// Example usage, assuming you have an instance of IBCHeader
+// LogIBCHeader(logger, ibcHeaderInstance)

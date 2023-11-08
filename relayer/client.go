@@ -17,11 +17,13 @@ import (
 
 // CreateClients creates clients for src on dst and dst on src if the client ids are unspecified.
 func (c *Chain) CreateClients(ctx context.Context, dst *Chain, allowUpdateAfterExpiry, allowUpdateAfterMisbehaviour, override bool, customClientTrustingPeriod time.Duration, memo string) (string, string, error) {
+	logger, logFile := CreateLogger()
 	// Query the latest heights on src and dst and retry if the query fails
 	var srch, dsth int64
 	if err := retry.Do(func() error {
 		var err error
 		srch, dsth, err = QueryLatestHeights(ctx, c, dst)
+		logger.Println("latest source height is %s		latest destination height is %s", srch, dsth)
 		if srch == 0 || dsth == 0 || err != nil {
 			return fmt.Errorf("failed to query latest heights: %w", err)
 		}
@@ -35,6 +37,10 @@ func (c *Chain) CreateClients(ctx context.Context, dst *Chain, allowUpdateAfterE
 	if err := retry.Do(func() error {
 		var err error
 		srcUpdateHeader, dstUpdateHeader, err = QueryIBCHeaders(ctx, c, dst, srch, dsth)
+		logger.Println("srcUpdateHeader is:")
+		LogIBCHeader(logger, srcUpdateHeader)
+		logger.Println("dstUpdateHeader is:")
+		LogIBCHeader(logger, dstUpdateHeader)
 		if err != nil {
 			return err
 		}
@@ -92,7 +98,7 @@ func (c *Chain) CreateClients(ctx context.Context, dst *Chain, allowUpdateAfterE
 		zap.String("dst_client_id", dst.PathEnd.ClientID),
 		zap.String("dst_chain_id", dst.ChainID()),
 	)
-
+	logFile.Close()
 	return clientSrc, clientDst, nil
 }
 
